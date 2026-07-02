@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>App PETAR - SSOMA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar { display: none; }
+        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view-section.active { display: block; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .camera-box {
+            border: 2px dashed #d1d5db;
+            background: repeating-linear-gradient(45deg, #f9fafb, #f9fafb 10px, #f3f4f6 10px, #f3f4f6 20px);
+        }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-gray-900 text-white p-4 shadow-md z-10 flex justify-between items-center shrink-0 border-b-4 border-[#B2EA01]">
+        <div class="flex items-center gap-2">
+            <i class="ph-fill ph-shield-check text-2xl text-[#FED104]"></i>
+            <div>
+                <h1 class="font-bold text-base leading-none">SSOMA Móvil</h1>
+                <p class="text-[10px] text-gray-300 uppercase tracking-widest mt-1">Control PETAR + Evidencia</p>
+            </div>
+        </div>
+        <div class="bg-gray-800 p-2 rounded-full">
+            <i class="ph ph-user text-xl"></i>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto pb-24 p-4 relative" id="mainContainer">
+
+        <!-- VISTA INICIO -->
+        <section id="view-dashboard" class="view-section active">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">Resumen de Operaciones</h2>
+
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div class="bg-gray-900 text-white rounded-xl shadow-sm p-4">
+                    <p class="text-[10px] text-gray-300 font-bold uppercase">PETAR activos</p>
+                    <h3 class="text-3xl font-black" id="dash-activos">0</h3>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border-l-4 border-emerald-500">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">PETAR cerrados</p>
+                    <h3 class="text-3xl font-black text-emerald-600" id="dash-cerrados">0</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3">
+                <!-- Planta -->
+                <div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between border-l-4 border-[#B2EA01]">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#B2EA01]/20 p-3 rounded-full text-gray-800"><i class="ph-fill ph-factory text-2xl"></i></div>
+                        <div><p class="text-xs text-gray-500 font-bold uppercase">Planta</p><p class="text-sm text-gray-700">Permisos activos</p></div>
+                    </div>
+                    <h3 class="text-3xl font-black text-gray-800" id="dash-planta">0</h3>
+                </div>
+                <!-- Mina -->
+                <div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between border-l-4 border-[#FED104]">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#FED104]/30 p-3 rounded-full text-gray-800"><i class="ph-fill ph-hard-hat text-2xl"></i></div>
+                        <div><p class="text-xs text-gray-500 font-bold uppercase">Mina</p><p class="text-sm text-gray-700">Permisos activos</p></div>
+                    </div>
+                    <h3 class="text-3xl font-black text-gray-800" id="dash-mina">0</h3>
+                </div>
+                <!-- Superficie -->
+                <div class="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between border-l-4 border-amber-500">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-amber-100 p-3 rounded-full text-amber-600"><i class="ph-fill ph-sun text-2xl"></i></div>
+                        <div><p class="text-xs text-gray-500 font-bold uppercase">Superficie</p><p class="text-sm text-gray-700">Permisos activos</p></div>
+                    </div>
+                    <h3 class="text-3xl font-black text-gray-800" id="dash-superficie">0</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-6">
+                <button onclick="switchView('view-form', document.getElementById('nav-registrar'))" class="w-full bg-gray-900 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i class="ph ph-plus-circle text-xl text-[#B2EA01]"></i> Crear
+                </button>
+                <button onclick="switchView('view-close', document.getElementById('nav-cerrar'))" class="w-full bg-[#FED104] text-gray-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i class="ph ph-camera text-xl"></i> Cerrar
+                </button>
+            </div>
+
+            <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
+                <strong>Flujo de control:</strong> primero registra el PETAR y guarda el código. Luego, para cerrar el permiso, ingresa el mismo código y carga la foto del PETAR realizado.
+            </div>
+        </section>
+
+        <!-- VISTA FORMULARIO -->
+        <section id="view-form" class="view-section">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><i class="ph ph-file-text text-[#B2EA01]"></i> Nuevo PETAR</h2>
+            <form id="petarForm" class="bg-white p-4 rounded-xl shadow-sm space-y-4 border-t-4 border-[#FED104]">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fecha del Trabajo</label>
+                    <input type="date" id="fecha" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-[#B2EA01]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">1. Área de Operación</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="area" value="Planta" class="peer sr-only" required>
+                            <div class="text-center p-2 rounded-lg border-2 border-gray-100 peer-checked:bg-[#B2EA01]/10 peer-checked:border-[#B2EA01] peer-checked:text-black text-gray-400">
+                                <i class="ph-fill ph-factory text-2xl block mb-1"></i><span class="text-[10px] font-bold">Planta</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="area" value="Mina" class="peer sr-only">
+                            <div class="text-center p-2 rounded-lg border-2 border-gray-100 peer-checked:bg-[#FED104]/10 peer-checked:border-[#FED104] peer-checked:text-black text-gray-400">
+                                <i class="ph-fill ph-hard-hat text-2xl block mb-1"></i><span class="text-[10px] font-bold">Mina</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="area" value="Superficie" class="peer sr-only">
+                            <div class="text-center p-2 rounded-lg border-2 border-gray-100 peer-checked:bg-amber-50 peer-checked:border-amber-500 peer-checked:text-amber-700 text-gray-400">
+                                <i class="ph-fill ph-sun text-2xl block mb-1"></i><span class="text-[10px] font-bold">Superficie</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Empresa</label>
+                    <select id="tipoEmpresa" required onchange="toggleOtraEmpresa()" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                        <option value="">Elegir...</option>
+                        <option value="Lincuna">Lincuna</option>
+                        <option value="Contrata">Contrata</option>
+                    </select>
+                    <input type="text" id="otraEmpresa" placeholder="Especificar contrata..." class="hidden mt-2 w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                    <input type="text" id="areaLincuna" placeholder="Especificar Área (Ej: Mantenimiento)..." class="hidden mt-2 w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Turno</label>
+                    <select id="turno" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                        <option value="">Elegir...</option>
+                        <option value="Día">Día</option>
+                        <option value="Noche">Noche</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Ubicación / Nivel</label>
+                    <input type="text" id="areaEspecifica" required placeholder="Ej: Nv. 4400 / Planta / Taller..." class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Supervisor Responsable</label>
+                    <input type="text" id="supervisor" required placeholder="Digite el nombre..." class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Jefe de Área</label>
+                    <input type="text" id="jefeArea" required placeholder="Digite el nombre..." class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Tipo de Riesgo / Trabajo Crítico</label>
+                    <select id="tipoTrabajo" required onchange="toggleOtroRiesgo()" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                        <option value="">Seleccione el riesgo...</option>
+                        <option value="Trabajo en Caliente">Trabajo en Caliente</option>
+                        <option value="Espacios Confinados">Espacios Confinados</option>
+                        <option value="Trabajo en Altura">Trabajo en Altura</option>
+                        <option value="Riesgo Eléctrico">Riesgo Eléctrico</option>
+                        <option value="Izaje Crítico">Izaje Crítico</option>
+                        <option value="Excavaciones">Excavaciones y Zanjas</option>
+                        <option value="Voladura">Voladura / Manejo de Explosivos</option>
+                        <option value="MATPEL">MATPEL</option>
+                        <option value="Chimeneas">Trabajos en Chimeneas / Piques</option>
+                        <option value="Otro">Otro (Especificar)</option>
+                    </select>
+                    <input type="text" id="otroRiesgo" placeholder="Especifique el riesgo..." class="hidden mt-2 w-full bg-white border border-gray-300 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Descripción del Trabajo</label>
+                    <textarea id="descripcion" rows="3" required placeholder="Detalle las labores..." class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500"></textarea>
+                </div>
+                <button type="submit" id="btnGuardar" class="w-full bg-[#B2EA01] active:bg-[#9ac900] text-gray-900 font-bold py-3.5 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2 mt-4">
+                    <i class="ph ph-paper-plane-tilt text-xl"></i> Enviar y generar código
+                </button>
+            </form>
+        </section>
+
+        <!-- VISTA CIERRE CON EVIDENCIA -->
+        <section id="view-close" class="view-section">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><i class="ph ph-camera text-[#FED104]"></i> Cierre con Evidencia</h2>
+            <form id="closeForm" class="bg-white p-4 rounded-xl shadow-sm space-y-4 border-t-4 border-gray-900">
+                <div class="bg-gray-900 text-white rounded-xl p-3 text-xs">
+                    <strong>Importante:</strong> para cerrar el PETAR debes colocar exactamente el mismo código generado al registrar el permiso.
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Código PETAR</label>
+                    <input type="text" id="codigoCierre" required placeholder="Ej: PTR-LINX-0001" autocomplete="off" class="uppercase w-full bg-gray-50 border border-gray-200 p-3 rounded-lg text-sm font-black tracking-wide outline-none focus:border-[#FED104]">
+                    <p class="text-[10px] text-gray-400 mt-1">El sistema buscará este código en Google Sheets y actualizará esa misma fila.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fecha y hora de cierre</label>
+                    <input type="datetime-local" id="fechaCierre" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-[#FED104]">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Responsable que cierra</label>
+                    <input type="text" id="responsableCierre" required placeholder="Nombre del responsable..." class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1">Observaciones de cierre</label>
+                    <textarea id="observacionesCierre" rows="3" placeholder="Ej: Trabajo culminado, área liberada, PETAR firmado..." class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-lg text-sm outline-none focus:border-gray-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Foto del PETAR realizado</label>
+                    <label class="camera-box rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer min-h-[150px]">
+                        <input id="fotoCierre" type="file" accept="image/*" capture="environment" required class="hidden">
+                        <i class="ph ph-camera-plus text-5xl text-gray-500 mb-2"></i>
+                        <span class="text-sm font-bold text-gray-700">Tomar foto / cargar evidencia</span>
+                        <span class="text-[11px] text-gray-500 mt-1">Recomendado: foto clara del PETAR firmado o realizado</span>
+                    </label>
+                    <div id="previewContainer" class="hidden mt-3">
+                        <img id="previewFoto" class="w-full max-h-72 object-cover rounded-xl border border-gray-200 shadow-sm" alt="Vista previa de la evidencia">
+                        <button type="button" onclick="limpiarFoto()" class="mt-2 w-full bg-gray-100 text-gray-700 text-xs font-bold py-2 rounded-lg">
+                            Cambiar foto
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnCerrarPetar" class="w-full bg-gray-900 active:bg-black text-white font-bold py-3.5 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2 mt-4">
+                    <i class="ph ph-check-circle text-xl text-[#B2EA01]"></i> Cerrar PETAR con evidencia
+                </button>
+            </form>
+        </section>
+
+        <!-- VISTA HISTORIAL -->
+        <section id="view-history" class="view-section">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-gray-800">Historial local</h2>
+                <div class="bg-white px-2 py-1 rounded-lg border border-gray-200 shadow-sm flex items-center">
+                    <i class="ph ph-funnel text-gray-400 mr-1 text-sm"></i>
+                    <select id="filterAreaMobile" onchange="renderHistory()" class="bg-transparent text-xs font-medium outline-none">
+                        <option value="Todas">Todas</option>
+                        <option value="Planta">Planta</option>
+                        <option value="Mina">Mina</option>
+                        <option value="Superficie">Superf.</option>
+                    </select>
+                </div>
+            </div>
+            <div id="historyList" class="space-y-3 pb-4"></div>
+            <div id="emptyHistory" class="hidden text-center text-gray-400 py-10">
+                <i class="ph ph-folder-open text-5xl mb-2"></i><p class="text-sm">No hay registros aún.</p>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bg-white border-t border-gray-200 fixed bottom-0 w-full z-20 flex justify-around items-center pb-safe">
+        <button id="nav-inicio" onclick="switchView('view-dashboard', this)" class="nav-btn active flex-1 py-3 flex flex-col items-center gap-1 text-gray-900 transition-colors">
+            <i class="ph-fill ph-squares-four text-2xl"></i><span class="text-[10px] font-semibold">Inicio</span>
+        </button>
+        <button id="nav-registrar" onclick="switchView('view-form', this)" class="nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-400 transition-colors">
+            <i class="ph-fill ph-plus-circle text-2xl"></i><span class="text-[10px] font-semibold">Registrar</span>
+        </button>
+        <button id="nav-cerrar" onclick="switchView('view-close', this)" class="nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-400 transition-colors">
+            <i class="ph-fill ph-camera text-2xl"></i><span class="text-[10px] font-semibold">Cerrar</span>
+        </button>
+        <button id="nav-historial" onclick="switchView('view-history', this)" class="nav-btn flex-1 py-3 flex flex-col items-center gap-1 text-gray-400 transition-colors">
+            <i class="ph-fill ph-files text-2xl"></i><span class="text-[10px] font-semibold">Historial</span>
+        </button>
+    </nav>
+
+    <!-- MODAL DE MENSAJE -->
+    <div id="successModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center transform scale-100 transition-transform border-t-8 border-[#B2EA01]">
+            <div class="w-16 h-16 bg-[#B2EA01]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i id="modalIcon" class="ph ph-check text-4xl text-gray-900 font-bold"></i>
+            </div>
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-1">¡Guardado!</h3>
+            <p id="modalText" class="text-sm text-gray-500 mb-4">El PETAR fue registrado correctamente.</p>
+            <div id="modalCodeBox" class="bg-gray-100 p-3 rounded-xl mb-6">
+                <p class="text-[10px] uppercase font-bold text-gray-500 mb-1">CÓDIGO</p>
+                <p id="generatedCodeDisplay" class="text-2xl font-black text-gray-800">PTR-LINX-000</p>
+            </div>
+            <button onclick="closeModal()" class="w-full bg-[#FED104] text-gray-900 font-bold py-3 rounded-xl shadow-sm">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        // Pega aquí la URL de despliegue de tu Apps Script.
+        // Si actualizas el mismo despliegue de Google Apps Script, esta URL puede mantenerse.
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuOIAkD-lo8ePtUDKjBxQS46bD-omMod1NO07vQxIPsjBRdi2V7b4LWTN3-BgFBShu/exec';
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('fecha').valueAsDate = new Date();
+            document.getElementById('fechaCierre').value = getNowLocalDateTime();
+            renderHistory();
+        });
+
+        function getNowLocalDateTime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            return now.toISOString().slice(0, 16);
+        }
+
+        function toggleOtroRiesgo() {
+            var select = document.getElementById("tipoTrabajo");
+            var inputOtro = document.getElementById("otroRiesgo");
+            if (select.value === "Otro") {
+                inputOtro.classList.remove("hidden");
+                inputOtro.required = true;
+            } else {
+                inputOtro.classList.add("hidden");
+                inputOtro.required = false;
+                inputOtro.value = ""; 
+            }
+        }
+
+        function toggleOtraEmpresa() {
+            var select = document.getElementById("tipoEmpresa");
+            var inputContrata = document.getElementById("otraEmpresa");
+            var inputLincuna = document.getElementById("areaLincuna");
+
+            if (select.value === "Contrata") {
+                inputContrata.classList.remove("hidden");
+                inputContrata.required = true;
+
+                inputLincuna.classList.add("hidden");
+                inputLincuna.required = false;
+                inputLincuna.value = ""; 
+            } else if (select.value === "Lincuna") {
+                inputLincuna.classList.remove("hidden");
+                inputLincuna.required = true;
+
+                inputContrata.classList.add("hidden");
+                inputContrata.required = false;
+                inputContrata.value = ""; 
+            } else {
+                inputContrata.classList.add("hidden");
+                inputContrata.required = false;
+                inputContrata.value = ""; 
+
+                inputLincuna.classList.add("hidden");
+                inputLincuna.required = false;
+                inputLincuna.value = ""; 
+            }
+        }
+
+        // Cargar memoria local al abrir la app.
+        let petarDatabase = JSON.parse(localStorage.getItem('petarLocalDB')) || [];
+
+        function switchView(viewId, btnElement = null) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            if(btnElement) {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('text-gray-900');
+                    btn.classList.add('text-gray-400');
+                });
+                btnElement.classList.remove('text-gray-400');
+                btnElement.classList.add('text-gray-900');
+            }
+
+            if(viewId === 'view-history' || viewId === 'view-dashboard') renderHistory();
+            document.getElementById('mainContainer').scrollTo(0, 0);
+        }
+
+        function mostrarModal(titulo, texto, codigo, tipo = 'success') {
+            document.getElementById('modalTitle').textContent = titulo;
+            document.getElementById('modalText').textContent = texto;
+            document.getElementById('generatedCodeDisplay').textContent = codigo || '';
+            document.getElementById('modalCodeBox').classList.toggle('hidden', !codigo);
+
+            const icon = document.getElementById('modalIcon');
+            icon.className = tipo === 'camera'
+                ? 'ph ph-camera text-4xl text-gray-900 font-bold'
+                : 'ph ph-check text-4xl text-gray-900 font-bold';
+
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            switchView('view-dashboard', document.getElementById('nav-inicio')); 
+        }
+
+        function setCloseCode(codigo) {
+            document.getElementById('codigoCierre').value = codigo || '';
+            document.getElementById('fechaCierre').value = getNowLocalDateTime();
+            switchView('view-close', document.getElementById('nav-cerrar'));
+        }
+
+        function getEstado(petar) {
+            return (petar.estado || 'REGISTRADO').toUpperCase();
+        }
+
+        function renderHistory() {
+            const listContainer = document.getElementById('historyList');
+            const emptyState = document.getElementById('emptyHistory');
+            const filterSelect = document.getElementById('filterAreaMobile');
+            const filterVal = filterSelect ? filterSelect.value : 'Todas';
+
+            if(listContainer) listContainer.innerHTML = '';
+
+            const filteredData = petarDatabase.filter(p => filterVal === 'Todas' || p.area === filterVal);
+
+            if(listContainer && emptyState) {
+                if(filteredData.length === 0) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+
+                    filteredData.sort((a,b) => b.id - a.id).forEach(petar => {
+                        let colorCls = "border-gray-200 text-gray-600";
+                        let bgIcon = "bg-gray-100";
+                        let icon = "ph-file";
+
+                        if(petar.area === 'Planta') { colorCls = "border-[#B2EA01] text-gray-800"; bgIcon="bg-[#B2EA01]/20"; icon="ph-factory"; }
+                        if(petar.area === 'Mina') { colorCls = "border-[#FED104] text-gray-800"; bgIcon="bg-[#FED104]/30"; icon="ph-hard-hat"; }
+                        if(petar.area === 'Superficie') { colorCls = "border-amber-200 text-amber-700"; bgIcon="bg-amber-50"; icon="ph-sun"; }
+
+                        const estado = getEstado(petar);
+                        const cerrado = estado === 'CERRADO';
+                        const estadoClass = cerrado ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600';
+                        const estadoText = cerrado ? 'Cerrado' : 'Registrado';
+
+                        const evidenciaLink = petar.evidenciaUrl
+                            ? `<a href="${petar.evidenciaUrl}" target="_blank" class="text-[10px] text-emerald-700 font-bold underline"><i class="ph ph-image"></i> Ver evidencia</a>`
+                            : `<button onclick="setCloseCode('${petar.numero || ''}')" class="text-[10px] text-gray-900 font-bold underline"><i class="ph ph-camera"></i> Cerrar</button>`;
+
+                        const card = document.createElement('div');
+                        card.className = `bg-white p-4 rounded-xl shadow-sm border-l-4 ${colorCls} relative`;
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="${bgIcon} p-2 rounded-lg text-gray-800">
+                                        <i class="ph-fill ${icon} text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-800 text-sm">${petar.numero || 'Sin código'}</h4>
+                                        <p class="text-[10px] text-gray-500">${petar.fecha || '-'} • ${petar.turno || '-'}</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-bold px-2 py-1 rounded ${estadoClass}">${estadoText}</span>
+                            </div>
+                            <div class="text-xs text-gray-600 mb-2">
+                                <span class="font-semibold text-gray-800">⚠️ ${petar.tipo || '-'}</span><br>
+                                Empresa: <strong>${petar.empresa || '-'}</strong><br>
+                                Ubicación: ${petar.areaEspecifica || '-'}
+                            </div>
+                            <div class="border-t border-gray-100 pt-2 flex justify-between items-center gap-2">
+                                <span class="text-[10px] text-gray-500"><i class="ph ph-user"></i> Sup: ${petar.supervisor || '-'}</span>
+                                ${evidenciaLink}
+                            </div>
+                        `;
+                        listContainer.appendChild(card);
+                    });
+                }
+            }
+
+            const activos = petarDatabase.filter(p => getEstado(p) !== 'CERRADO');
+            const cerrados = petarDatabase.filter(p => getEstado(p) === 'CERRADO');
+
+            document.getElementById('dash-activos').textContent = activos.length;
+            document.getElementById('dash-cerrados').textContent = cerrados.length;
+            document.getElementById('dash-planta').textContent = activos.filter(p=>p.area==='Planta').length;
+            document.getElementById('dash-mina').textContent = activos.filter(p=>p.area==='Mina').length;
+            document.getElementById('dash-superficie').textContent = activos.filter(p=>p.area==='Superficie').length;
+        }
+
+        async function postToGoogle(payload) {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+
+            const rawText = await response.text();
+            try {
+                return JSON.parse(rawText);
+            } catch (err) {
+                throw new Error('La respuesta del servidor no es JSON válido: ' + rawText.slice(0, 120));
+            }
+        }
+
+        document.getElementById('petarForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnGuardar');
+
+            const radios = document.getElementsByName('area');
+            let selArea = '';
+            for(let r of radios) { if(r.checked) selArea = r.value; }
+
+            let riesgoFinal = document.getElementById('tipoTrabajo').value;
+            if (riesgoFinal === "Otro") {
+                riesgoFinal = "Otro: " + document.getElementById('otroRiesgo').value;
+            }
+
+            let empresaFinal = document.getElementById('tipoEmpresa').value;
+            if (empresaFinal === "Contrata") {
+                empresaFinal = "Contrata: " + document.getElementById('otraEmpresa').value;
+            } else if (empresaFinal === "Lincuna") {
+                empresaFinal = "Lincuna (Área: " + document.getElementById('areaLincuna').value + ")";
+            }
+
+            const newData = {
+                accion: 'crear',
+                id: Date.now(),
+                fecha: document.getElementById('fecha').value,
+                empresa: empresaFinal,
+                turno: document.getElementById('turno').value,
+                areaEspecifica: document.getElementById('areaEspecifica').value,
+                supervisor: document.getElementById('supervisor').value,
+                jefeArea: document.getElementById('jefeArea').value,
+                area: selArea,
+                tipo: riesgoFinal,
+                descripcion: document.getElementById('descripcion').value
+            };
+
+            try {
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Solicitando código oficial...';
+                btn.disabled = true;
+
+                const data = await postToGoogle(newData);
+
+                if(data.status !== 'success') {
+                    throw new Error(data.message || 'No se pudo guardar el PETAR.');
+                }
+
+                newData.numero = data.codigoAsignado;
+                newData.estado = 'REGISTRADO';
+
+                petarDatabase.push(newData);
+                localStorage.setItem('petarLocalDB', JSON.stringify(petarDatabase));
+
+                document.getElementById('petarForm').reset();
+                document.getElementById('fecha').valueAsDate = new Date();
+                document.getElementById('otroRiesgo').classList.add("hidden");
+                document.getElementById('otraEmpresa').classList.add("hidden");
+                document.getElementById('areaLincuna').classList.add("hidden");
+
+                mostrarModal('¡PETAR registrado!', 'Guarda este código. Lo necesitarás para cerrar el PETAR con evidencia.', data.codigoAsignado);
+                renderHistory(); 
+
+            } catch(error) {
+                alert("Hubo un error al guardar: " + error.message);
+            } finally {
+                btn.innerHTML = '<i class="ph ph-paper-plane-tilt text-xl"></i> Enviar y generar código';
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('fotoCierre').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const preview = document.getElementById('previewFoto');
+            preview.src = URL.createObjectURL(file);
+            document.getElementById('previewContainer').classList.remove('hidden');
+        });
+
+        function limpiarFoto() {
+            document.getElementById('fotoCierre').value = '';
+            document.getElementById('previewFoto').src = '';
+            document.getElementById('previewContainer').classList.add('hidden');
+        }
+
+        function leerArchivoComoDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function prepararImagen(file) {
+            const originalDataUrl = await leerArchivoComoDataURL(file);
+
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const maxWidth = 1200;
+                    const scale = Math.min(1, maxWidth / img.width);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+                    resolve({
+                        fileName: limpiarNombreArchivo(file.name || 'evidencia.jpg'),
+                        mimeType: 'image/jpeg',
+                        base64: compressedDataUrl.split(',')[1]
+                    });
+                };
+
+                img.onerror = function() {
+                    resolve({
+                        fileName: limpiarNombreArchivo(file.name || 'evidencia.jpg'),
+                        mimeType: file.type || 'image/jpeg',
+                        base64: originalDataUrl.split(',')[1]
+                    });
+                };
+
+                img.src = originalDataUrl;
+            });
+        }
+
+        function limpiarNombreArchivo(nombre) {
+            return String(nombre)
+                .replace(/\s+/g, '_')
+                .replace(/[^\w.\-]/g, '')
+                .slice(0, 80);
+        }
+
+        document.getElementById('closeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btnCerrarPetar');
+            const file = document.getElementById('fotoCierre').files[0];
+            const codigo = document.getElementById('codigoCierre').value.trim().toUpperCase();
+
+            if(!file) {
+                alert('Debes cargar una foto como evidencia.');
+                return;
+            }
+
+            try {
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Comprimiendo evidencia...';
+                btn.disabled = true;
+
+                const evidencia = await prepararImagen(file);
+
+                const payload = {
+                    accion: 'cerrar',
+                    codigo: codigo,
+                    fechaCierre: document.getElementById('fechaCierre').value,
+                    responsableCierre: document.getElementById('responsableCierre').value,
+                    observacionesCierre: document.getElementById('observacionesCierre').value,
+                    evidencia: evidencia
+                };
+
+                btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Cerrando PETAR...';
+
+                const data = await postToGoogle(payload);
+
+                if(data.status !== 'success') {
+                    throw new Error(data.message || 'No se pudo cerrar el PETAR.');
+                }
+
+                const index = petarDatabase.findIndex(p => String(p.numero || '').toUpperCase() === codigo);
+                if(index >= 0) {
+                    petarDatabase[index].estado = 'CERRADO';
+                    petarDatabase[index].fechaCierre = payload.fechaCierre;
+                    petarDatabase[index].responsableCierre = payload.responsableCierre;
+                    petarDatabase[index].observacionesCierre = payload.observacionesCierre;
+                    petarDatabase[index].evidenciaUrl = data.evidenciaUrl || '';
+                    localStorage.setItem('petarLocalDB', JSON.stringify(petarDatabase));
+                }
+
+                document.getElementById('closeForm').reset();
+                document.getElementById('fechaCierre').value = getNowLocalDateTime();
+                limpiarFoto();
+
+                mostrarModal('¡PETAR cerrado!', 'La evidencia fue cargada y se actualizó el registro en Google Sheets.', codigo, 'camera');
+                renderHistory();
+
+            } catch(error) {
+                alert("Hubo un error al cerrar: " + error.message);
+            } finally {
+                btn.innerHTML = '<i class="ph ph-check-circle text-xl text-[#B2EA01]"></i> Cerrar PETAR con evidencia';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
